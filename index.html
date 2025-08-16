@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Хто онлайн</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Онлайн користувачі</h1>
+
+      <div id="login">
+        <input type="text" id="nameInput" placeholder="Введіть ім’я..." />
+        <br />
+        <button onclick="setName()">Увійти</button>
+      </div>
+
+      <div id="onlineList" style="display: none">
+        <ul id="users"></ul>
+      </div>
+    </div>
+
+    <script>
+      // ⚠️ Заміни YOUR_RENDER_URL на адресу Render після деплою
+      const ws = new WebSocket("wss://stetsenkovlad.onrender.com);
+
+      function setName() {
+        const name = document.getElementById("nameInput").value.trim();
+        if (!name) return;
+
+        ws.send(JSON.stringify({ type: "setName", name }));
+
+        document.getElementById("login").style.display = "none";
+        document.getElementById("onlineList").style.display = "block";
+      }
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "onlineList") {
+          const usersEl = document.getElementById("users");
+          usersEl.innerHTML = "";
+          data.users.forEach((user) => {
+            const li = document.createElement("li");
+
+            const dot = document.createElement("span");
+            dot.className = "status-dot online";
+
+            const text = document.createElement("span");
+            text.textContent = " " + user;
+
+            li.appendChild(dot);
+            li.appendChild(text);
+            usersEl.appendChild(li);
+          });
+        }
+      };
+    </script>
+  </body>
+</html>
